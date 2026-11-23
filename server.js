@@ -19,6 +19,7 @@ import mediaRoutes from './routes/media.js';
 dotenv.config();
 
 const app = express();
+app.set('trust proxy', 1);
 const PORT = process.env.PORT || 5000;
 
 // Security & middleware
@@ -46,13 +47,16 @@ app.use(cors({
 }));
 // Session
 app.use(session({
-  secret: process.env.SESSION_SECRET || 'al-hayat-dev-secret-change-me',
+  name: 'connect.sid',
+  secret: process.env.SESSION_SECRET,
   resave: false,
   saveUninitialized: false,
+
   store: MongoStore.create({
     mongoUrl: process.env.MONGODB_URI,
-    ttl: 24 * 60 * 60, // 1 day
+    ttl: 24 * 60 * 60,
   }),
+
   cookie: {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
@@ -60,7 +64,6 @@ app.use(session({
     maxAge: 24 * 60 * 60 * 1000,
   },
 }));
-
 // Rate limit for auth
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
